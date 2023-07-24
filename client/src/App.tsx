@@ -2,13 +2,11 @@ import { CircularProgress, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
 import { AppContext } from "./AppContext";
 import { Home } from "./components/Home";
-import { Layouts } from "./components/Layouts";
 import { NavBar } from "./components/NavBar";
 import { ClientMessage, InputMode, ServerMessage } from "./types";
 
 function App() {
   const [ready, setReady] = useState(false);
-  const [tab, setTab] = useState("home");
   const [inputMode, setInputMode] = useState<InputMode>();
   const [ports, setPorts] = useState<string[]>([]);
 
@@ -39,17 +37,10 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const tabComponents: Record<string, JSX.Element> = {
-    home: <Home />,
-    layouts: <Layouts />,
-  };
-
   return (
     <AppContext.Provider
       value={{
         ready,
-        tab,
-        setTab,
         inputMode,
         setInputMode,
         ports,
@@ -59,7 +50,7 @@ function App() {
         <NavBar />
         <div style={{ flexGrow: 1, minHeight: 0 }}>
           {ready ? (
-            tabComponents[tab]
+            <Home />
           ) : (
             <Stack
               height="100%"

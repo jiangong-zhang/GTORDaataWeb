@@ -10,20 +10,11 @@ import { ChangeEvent, useContext, useState } from "react";
 import { AppContext } from "../AppContext";
 
 export function NavBar() {
-  const { ready, setTab, inputMode, setInputMode } = useContext(AppContext);
+  const { ready, inputMode, setInputMode, ports } = useContext(AppContext);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  function setCsvFile(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file) {
-      console.log(file);
-      setInputMode({ name: "CSV", data: "" });
-    }
-    setAnchorEl(null);
-  }
-
-  function setBinFile(e: ChangeEvent<HTMLInputElement>) {
+  function selectFile(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) {
       console.log(file);
@@ -37,8 +28,8 @@ export function NavBar() {
     setAnchorEl(null);
   }
 
-  function comInputMode() {
-    setInputMode({ name: "COM3" });
+  function comInputMode(name: string) {
+    setInputMode({ name });
     setAnchorEl(null);
   }
 
@@ -48,13 +39,7 @@ export function NavBar() {
         <Typography variant="h6" marginRight={3}>
           GTOR Daata
         </Typography>
-        <Button color="inherit" sx={{ mr: 1 }} onClick={() => setTab("home")}>
-          Home
-        </Button>
-        <Button color="inherit" onClick={() => setTab("layouts")}>
-          Layouts
-        </Button>
-        <div style={{ flexGrow: 1 }} />
+        <div style={{ flexGrow: 1 }}></div>
         {ready && (
           <>
             <Typography variant="button" marginRight={0.5}>
@@ -79,17 +64,13 @@ export function NavBar() {
         <MenuItem onClick={fakeInputMode}>Fake Data</MenuItem>
         <label>
           <MenuItem>
-            CSV File
-            <input type="file" hidden onChange={setCsvFile} />
+            Select File
+            <input type="file" hidden onChange={selectFile} />
           </MenuItem>
         </label>
-        <label>
-          <MenuItem>
-            Bin File
-            <input type="file" hidden onChange={setBinFile} />
-          </MenuItem>
-        </label>
-        <MenuItem onClick={comInputMode}>COM Port</MenuItem>
+        {ports.map((port) => (
+          <MenuItem onClick={() => comInputMode(port)}>{port}</MenuItem>
+        ))}
       </Menu>
     </AppBar>
   );
