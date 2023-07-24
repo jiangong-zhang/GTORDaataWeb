@@ -1,7 +1,15 @@
-import { Grid, Paper, Stack, Typography } from "@mui/material";
-import { green, red } from "@mui/material/colors";
+import {
+  Checkbox,
+  Chip,
+  Grid,
+  Paper,
+  Stack,
+  SxProps,
+  Typography,
+} from "@mui/material";
+import { useState } from "react";
 
-const paperSx = {
+const paperSx: SxProps = {
   height: "100%",
   borderRadius: 3,
   padding: 2,
@@ -18,6 +26,18 @@ for (let i = 0; i < 100; ++i) {
 }
 
 export function Home() {
+  const [checked, setChecked] = useState<number[]>([]);
+
+  function selectSensor(id: number, on: boolean) {
+    if (on) {
+      if (!checked.includes(id) && checked.length < 4) {
+        setChecked([...checked, id].sort((a, b) => a - b));
+      }
+    } else {
+      setChecked(checked.filter((c) => c !== id));
+    }
+  }
+
   return (
     <Grid
       container
@@ -27,35 +47,48 @@ export function Home() {
       height="100%"
       boxSizing="border-box"
     >
-      <Grid item xs={6} height="100%">
+      <Grid item xs={4} height="100%">
         <Paper sx={paperSx}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            marginBottom={1.5}
+          >
+            <Typography variant="h6">Status</Typography>
+            <Chip label="Connected" color="success" />
+          </Stack>
           <Typography variant="h6" marginBottom={1.5}>
             Sensors
           </Typography>
           {sensors.map((sensor) => (
-            <Stack direction="row" alignItems="center" key={sensor.id}>
-              <div
-                style={{
-                  display: "inline-block",
-                  width: 16,
-                  height: 16,
-                  margin: "4px 8px 4px 0",
-                  borderRadius: "50%",
-                  backgroundColor: sensor.connected ? green[500] : red[500],
-                }}
+            <Stack
+              direction="row"
+              alignItems="center"
+              marginLeft={-0.5}
+              key={sensor.id}
+            >
+              <Checkbox
+                size="small"
+                sx={{ padding: 0.5 }}
+                checked={checked.includes(sensor.id)}
+                onChange={(e) => selectSensor(sensor.id, e.target.checked)}
               />
-              <Typography variant="body2">
+              <Typography variant="body2" marginLeft={0.5}>
                 {sensor.id}: {sensor.name}
               </Typography>
             </Stack>
           ))}
         </Paper>
       </Grid>
-      <Grid item xs={6}>
+      <Grid item xs={8}>
         <Paper sx={paperSx}>
           <Typography variant="h6" marginBottom={1.5}>
-            Status
+            Data
           </Typography>
+          {checked.map((id) => (
+            <p>{id}</p> // temporary placeholder for graphs
+          ))}
         </Paper>
       </Grid>
     </Grid>
