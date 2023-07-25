@@ -1,5 +1,6 @@
 import asyncio
 import json
+import subprocess
 from serial.tools import list_ports
 from websockets.server import serve, WebSocketServerProtocol
 
@@ -38,8 +39,12 @@ async def handler(websocket: WebSocketServerProtocol):
 
 
 async def main():
+  print('\nStarting websocket server...')
   async with serve(handler, 'localhost', 3001):
     print('Websocket server running on port 3001')
+    print('\nStarting client...')
+    subprocess.Popen('cd client && yarn dev', shell=True)
+
     await asyncio.Future()  # run forever
 
 
