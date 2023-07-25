@@ -69,7 +69,9 @@ export function NavBar() {
           </MenuItem>
         </label>
         {ports.map((port) => (
-          <MenuItem onClick={() => comInputMode(port)}>{port}</MenuItem>
+          <MenuItem onClick={() => comInputMode(port)} key={port}>
+            {port}
+          </MenuItem>
         ))}
       </Menu>
     </AppBar>

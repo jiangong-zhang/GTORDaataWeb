@@ -1,5 +1,5 @@
 import { CircularProgress, Stack } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AppContext } from "./AppContext";
 import { Home } from "./components/Home";
 import { NavBar } from "./components/NavBar";
@@ -9,10 +9,17 @@ function App() {
   const [ready, setReady] = useState(false);
   const [inputMode, setInputMode] = useState<InputMode>();
   const [ports, setPorts] = useState<string[]>([]);
+  const [statusCode, setStatusCode] = useState(0);
+
+  const ws = useMemo(() => new WebSocket("ws://localhost:3001"), []);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:3001");
+    ws.onclose = () => {
+      setReady(false);
+    };
+  }, [ws]);
 
+  useEffect(() => {
     ws.onmessage = (e) => {
       const data: ServerMessage = JSON.parse(e.data);
       if (data.init) {
@@ -20,22 +27,16 @@ function App() {
         setReady(true);
       }
 
-      setPorts((ports) => {
-        if (ports.toString() !== data.ports.toString()) {
-          return data.ports;
-        }
-        return ports;
-      });
+      if (ports.toString() !== data.ports.toString()) {
+        setPorts(data.ports);
+      }
+
+      setStatusCode(data.statusCode);
 
       const msg: ClientMessage = { inputMode };
       ws.send(JSON.stringify(msg));
     };
-
-    ws.onclose = () => {
-      setReady(false);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [inputMode, ports, ws]);
 
   return (
     <AppContext.Provider
@@ -44,6 +45,7 @@ function App() {
         inputMode,
         setInputMode,
         ports,
+        statusCode,
       }}
     >
       <Stack height="100vh">

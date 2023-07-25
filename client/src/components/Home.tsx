@@ -7,7 +7,8 @@ import {
   SxProps,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { AppContext } from "../AppContext";
 
 const paperSx: SxProps = {
   height: "100%",
@@ -26,6 +27,8 @@ for (let i = 0; i < 100; ++i) {
 }
 
 export function Home() {
+  const { statusCode } = useContext(AppContext);
+
   const [checked, setChecked] = useState<number[]>([]);
 
   function selectSensor(id: number, on: boolean) {
@@ -37,6 +40,12 @@ export function Home() {
       setChecked(checked.filter((c) => c !== id));
     }
   }
+
+  const statusChips = [
+    <Chip label="Disconnected" color="error" />,
+    <Chip label="Connecting" color="warning" />,
+    <Chip label="Connected" color="success" />,
+  ];
 
   return (
     <Grid
@@ -56,7 +65,7 @@ export function Home() {
             marginBottom={1.5}
           >
             <Typography variant="h6">Status</Typography>
-            <Chip label="Connected" color="success" />
+            {statusChips[statusCode]}
           </Stack>
           <Typography variant="h6" marginBottom={1.5}>
             Sensors

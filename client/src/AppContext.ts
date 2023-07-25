@@ -6,6 +6,7 @@ interface IAppContext {
   inputMode: InputMode | undefined;
   setInputMode: (inputMode: InputMode | undefined) => void;
   ports: string[];
+  statusCode: number;
 }
 
 export const AppContext = createContext<IAppContext>({} as IAppContext);

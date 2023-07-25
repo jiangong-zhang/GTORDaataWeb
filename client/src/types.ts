@@ -7,6 +7,7 @@ export type ServerMessage = {
   init?: boolean;
   inputMode?: InputMode;
   ports: string[];
+  statusCode: number;
 };
 
 export type ClientMessage = {
