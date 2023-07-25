@@ -10,8 +10,8 @@ Converting [GTORDaata](https://github.com/Georgia-Tech-Off-Road/GTORDaata) into 
 - Install all of the Node.js dependencies from [package.json](client/package.json) (in the client directory)
   - `yarn install`
 
-## Running
+## Execution
 
 - Run the backend server with `python main.py`
-- Run the frontend server with `yarn start` (in the client directory)
+- Run the frontend server with `yarn dev` (in the client directory)
 - Open [localhost:3000](http://localhost:3000)
