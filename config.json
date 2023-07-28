@@ -19,10 +19,6 @@
     {
       "name": "pressure_frontbrake_psi",
       "type": "pressure"
-    },
-    {
-      "name": "pressure_rearbrake_psi",
-      "type": "pressure"
     }
   ],
   "types": {
@@ -31,7 +27,7 @@
       "unit": "mm"
     },
     "pressure": {
-      "datatypes": ["float32"],
+      "datatypes": ["float32", "float32"],
       "unit": "psi"
     }
   }

@@ -14,10 +14,20 @@ class DataImport:
     self.config = config
     self.teensy_ser = None
 
-    self.expected_size = self.get_expected_size()
     self.start_code = [0xee, 0xe0]
     self.end_code = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xf0]
     self.current_packet = []
+    self.packets_received = 0
+
+    self.expected_size = 0
+    self.data = { 'millis': [] }
+
+    for sensor in config['sensors']:
+      datatypes = config['types'][sensor['type']]['datatypes']
+      for datatype in datatypes:
+        self.expected_size += size_dict[datatype]
+
+      self.data[sensor['name']] = []
 
     self.stop_thread = threading.Event()
 
@@ -26,15 +36,6 @@ class DataImport:
 
     print(f'Started data import with mode {input_mode}')
 
-
-  def get_expected_size(self):
-    size = 0
-    for i in self.config['sensors']:
-      datatypes = self.config['types'][i['type']]['datatypes']
-      for j in datatypes:
-        size += size_dict[j]
-    return size
-  
 
   def read_data(self):
     while not self.stop_thread.is_set():
@@ -47,16 +48,17 @@ class DataImport:
           if self.teensy_ser is None:
             self.teensy_ser = serial.Serial(baudrate=9600, port=self.input_mode['name'],
                                             timeout=1, write_timeout=1)
-          
-          all_bytes = self.teensy_ser.read_all()
-          for i in all_bytes:
-            self.current_packet.append(i)
 
-            if len(self.current_packet) >= len(self.end_code) and self.current_packet[-len(self.end_code):] == self.end_code:
-              if self.current_packet[:len(self.start_code)] == self.start_code:
-                self.unpacketize()
-              
-              self.current_packet.clear()
+          if self.teensy_ser.in_waiting > 0:
+            all_bytes = self.teensy_ser.read_all()
+            for i in all_bytes:
+              self.current_packet.append(i)
+
+              if len(self.current_packet) >= len(self.end_code) and self.current_packet[-len(self.end_code):] == self.end_code:
+                if self.current_packet[:len(self.start_code)] == self.start_code:
+                  self.unpacketize()
+
+                self.current_packet.clear()
         except serial.SerialException:
           print(f'Could not connect to {self.input_mode["name"]}')
         except Exception as e:
@@ -67,16 +69,27 @@ class DataImport:
   
   def unpacketize(self):
     data = self.current_packet[len(self.start_code):-len(self.end_code)]
+
+    millis = int.from_bytes(data[:4], 'little')
+    self.data['millis'].append(millis)
+    data = data[4:]
+
     if len(data) == self.expected_size:
-      idx = 0
-      for i in self.config['sensors']:
-        datatypes = self.config['types'][i['type']]['datatypes']
-        for j in datatypes:
-          raw_val = data[idx:idx+size_dict[j]]
-          if j == 'float32':
+      i = 0
+      for sensor in self.config['sensors']:
+        datatypes = self.config['types'][sensor['type']]['datatypes']
+        vals = []
+        for datatype in datatypes:
+          raw_val = data[i:i+size_dict[datatype]]
+          if datatype == 'float32':
             val = struct.unpack('f', bytes(raw_val))[0]
-            print(f'{i["name"]}: {val}')
-          idx += size_dict[j]
+            vals.append(val)
+            
+          i += size_dict[datatype]
+        self.data[sensor['name']].append(vals)
+
+      self.packets_received += 1
+      print(f'Received packet {self.packets_received} at time {millis}')
     else:
       print(f'Expected {self.expected_size} bytes, got {len(data)}')
 
