@@ -7,8 +7,9 @@ import {
   SxProps,
   Typography,
 } from "@mui/material";
-import { useContext, useState } from "react";
+import { useContext, useEffect } from "react";
 import { AppContext } from "../AppContext";
+import config from "../../../config.json";
 
 const paperSx: SxProps = {
   height: "100%",
@@ -17,29 +18,23 @@ const paperSx: SxProps = {
   overflowY: "auto",
 };
 
-const sensors: { id: number; name: string; connected: boolean }[] = [];
-for (let i = 0; i < 100; ++i) {
-  sensors.push({
-    id: i,
-    name: `random_sensor_name`,
-    connected: Math.random() > 0.5,
-  });
-}
-
 export function Home() {
-  const { statusCode } = useContext(AppContext);
+  const { inputMode, statusCode, graphs, setGraphs } = useContext(AppContext);
 
-  const [checked, setChecked] = useState<number[]>([]);
-
-  function selectSensor(id: number, on: boolean) {
+  function selectSensor(idx: number, on: boolean) {
     if (on) {
-      if (!checked.includes(id) && checked.length < 4) {
-        setChecked([...checked, id].sort((a, b) => a - b));
+      if (!graphs.includes(idx) && graphs.length < 4) {
+        setGraphs([...graphs, idx].sort((a, b) => a - b));
       }
     } else {
-      setChecked(checked.filter((c) => c !== id));
+      setGraphs(graphs.filter((c) => c !== idx));
     }
   }
+
+  useEffect(() => {
+    setGraphs([]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputMode]);
 
   const statusChips = [
     <Chip label="Disconnected" color="error" />,
@@ -70,21 +65,22 @@ export function Home() {
           <Typography variant="h6" marginBottom={1.5}>
             Sensors
           </Typography>
-          {sensors.map((sensor) => (
+          {config.sensors.map((sensor, i) => (
             <Stack
               direction="row"
               alignItems="center"
               marginLeft={-0.5}
-              key={sensor.id}
+              key={i}
             >
               <Checkbox
                 size="small"
                 sx={{ padding: 0.5 }}
-                checked={checked.includes(sensor.id)}
-                onChange={(e) => selectSensor(sensor.id, e.target.checked)}
+                checked={graphs.includes(i)}
+                disabled={statusCode !== 2}
+                onChange={(e) => selectSensor(i, e.target.checked)}
               />
               <Typography variant="body2" marginLeft={0.5}>
-                {sensor.id}: {sensor.name}
+                {sensor.name}
               </Typography>
             </Stack>
           ))}
@@ -95,8 +91,8 @@ export function Home() {
           <Typography variant="h6" marginBottom={1.5}>
             Data
           </Typography>
-          {checked.map((id) => (
-            <p>{id}</p> // temporary placeholder for graphs
+          {graphs.map((idx) => (
+            <p>{config.sensors[idx].name}</p> // temporary placeholder for graphs
           ))}
         </Paper>
       </Grid>

@@ -10,14 +10,17 @@ function App() {
   const [inputMode, setInputMode] = useState<InputMode>();
   const [ports, setPorts] = useState<string[]>([]);
   const [statusCode, setStatusCode] = useState(0);
+  const [graphs, setGraphs] = useState<number[]>([]);
 
-  const ws = useMemo(() => new WebSocket("ws://localhost:3001"), []);
+  const ws = useMemo(() => {
+    const ws = new WebSocket("ws://localhost:3001");
 
-  useEffect(() => {
     ws.onclose = () => {
       setReady(false);
     };
-  }, [ws]);
+
+    return ws;
+  }, []);
 
   useEffect(() => {
     ws.onmessage = (e) => {
@@ -33,10 +36,10 @@ function App() {
 
       setStatusCode(data.statusCode);
 
-      const msg: ClientMessage = { inputMode };
+      const msg: ClientMessage = { inputMode, graphs };
       ws.send(JSON.stringify(msg));
     };
-  }, [inputMode, ports, ws]);
+  }, [inputMode, ports, graphs, ws]);
 
   return (
     <AppContext.Provider
@@ -46,6 +49,8 @@ function App() {
         setInputMode,
         ports,
         statusCode,
+        graphs,
+        setGraphs,
       }}
     >
       <Stack height="100vh">

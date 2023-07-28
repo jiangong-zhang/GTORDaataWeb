@@ -7,6 +7,8 @@ interface IAppContext {
   setInputMode: (inputMode: InputMode | undefined) => void;
   ports: string[];
   statusCode: number;
+  graphs: number[];
+  setGraphs: (graphs: number[]) => void;
 }
 
 export const AppContext = createContext<IAppContext>({} as IAppContext);

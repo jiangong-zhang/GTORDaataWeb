@@ -12,4 +12,5 @@ export type ServerMessage = {
 
 export type ClientMessage = {
   inputMode?: InputMode;
+  graphs: number[];
 };

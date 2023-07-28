@@ -5,6 +5,8 @@ from websockets.server import serve, WebSocketServerProtocol
 
 from DataImport import DataImport
 
+config = json.load(open('config.json'))
+
 data_import: DataImport = None
 
 
@@ -20,7 +22,7 @@ def set_input_mode(mode):
     return
   if data_import is not None:
     data_import.close()
-  data_import = DataImport(mode)
+  data_import = DataImport(mode, config)
 
 
 def get_status_code():
@@ -55,14 +57,13 @@ async def handler(websocket: WebSocketServerProtocol):
 
   async for message in websocket:
     read_message(message)
-    await asyncio.sleep(0.1)
     await websocket.send(json.dumps(create_message()))
 
 
 async def main():
-  print('\nStarting websocket server...')
+  print('Starting websocket server...')
   async with serve(handler, 'localhost', 3001):
-    print('Websocket server running on port 3001')
+    print('Websocket server running on port 3001\n')
 
     await asyncio.Future()  # run forever
 
