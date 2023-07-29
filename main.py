@@ -3,7 +3,7 @@ import json
 from serial.tools import list_ports
 from websockets.server import serve, WebSocketServerProtocol
 
-from DataImport import DataImport
+from data_import import DataImport
 
 config = json.load(open('config.json'))
 
