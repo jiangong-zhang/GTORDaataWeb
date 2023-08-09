@@ -3,11 +3,13 @@ import json
 from serial.tools import list_ports
 from websockets.server import serve, WebSocketServerProtocol
 
-from data_import import DataImport
+from data_import import Data, DataImport
 
 config = json.load(open('config.json'))
 
+data = Data(config)
 data_import: DataImport = None
+graphs = []
 
 
 def get_input_mode():
@@ -22,7 +24,8 @@ def set_input_mode(mode):
     return
   if data_import is not None:
     data_import.close()
-  data_import = DataImport(mode, config)
+  if mode is not None:
+    data_import = DataImport(mode, data, config)
 
 
 def get_status_code():
@@ -36,6 +39,7 @@ def create_message():
   return {
     'ports': ports,
     'statusCode': get_status_code(),
+    'graphData': data.get_graph_data(graphs),
   }
 
 
@@ -48,8 +52,11 @@ def create_init_message():
 
 
 def read_message(msg):
+  global graphs
+
   data: dict = json.loads(msg)
   set_input_mode(data.get('inputMode', None))
+  graphs = data.get('graphs', [])
 
 
 async def handler(websocket: WebSocketServerProtocol):

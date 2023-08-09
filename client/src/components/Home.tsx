@@ -11,6 +11,8 @@ import { useContext, useEffect } from "react";
 import { AppContext } from "../AppContext";
 import config from "../../../config.json";
 
+type SensorType = keyof typeof config.types;
+
 const paperSx: SxProps = {
   height: "100%",
   borderRadius: 3,
@@ -19,7 +21,8 @@ const paperSx: SxProps = {
 };
 
 export function Home() {
-  const { inputMode, statusCode, graphs, setGraphs } = useContext(AppContext);
+  const { inputMode, statusCode, graphs, setGraphs, graphData } =
+    useContext(AppContext);
 
   function selectSensor(idx: number, on: boolean) {
     if (on) {
@@ -31,10 +34,19 @@ export function Home() {
     }
   }
 
+  const sensorValues = config.sensors.flatMap((sensor) => {
+    return config.types[sensor.type as SensorType].datatypes.map((d) => ({
+      name: sensor.name,
+      datatype: d,
+    }));
+  });
+
   useEffect(() => {
     setGraphs([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputMode]);
+
+  console.log(graphData);
 
   const statusChips = [
     <Chip label="Disconnected" color="error" />,
@@ -65,7 +77,7 @@ export function Home() {
           <Typography variant="h6" marginBottom={1.5}>
             Sensors
           </Typography>
-          {config.sensors.map((sensor, i) => (
+          {sensorValues.map((sensor, i) => (
             <Stack
               direction="row"
               alignItems="center"
@@ -91,8 +103,8 @@ export function Home() {
           <Typography variant="h6" marginBottom={1.5}>
             Data
           </Typography>
-          {graphs.map((idx) => (
-            <p>{config.sensors[idx].name}</p> // temporary placeholder for graphs
+          {graphs.map((idx, i) => (
+            <p key={i}>{sensorValues[idx].name}</p> // temporary placeholder for graphs
           ))}
         </Paper>
       </Grid>

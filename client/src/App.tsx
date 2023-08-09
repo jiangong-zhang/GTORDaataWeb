@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AppContext } from "./AppContext";
 import { Home } from "./components/Home";
 import { NavBar } from "./components/NavBar";
-import { ClientMessage, InputMode, ServerMessage } from "./types";
+import { ClientMessage, GraphData, InputMode, ServerMessage } from "./types";
 
 function App() {
   const [ready, setReady] = useState(false);
@@ -11,6 +11,7 @@ function App() {
   const [ports, setPorts] = useState<string[]>([]);
   const [statusCode, setStatusCode] = useState(0);
   const [graphs, setGraphs] = useState<number[]>([]);
+  const [graphData, setGraphData] = useState<GraphData>();
 
   const ws = useMemo(() => {
     const ws = new WebSocket("ws://localhost:3001");
@@ -34,12 +35,16 @@ function App() {
         setPorts(data.ports);
       }
 
+      if (graphData?.x.toString() !== data.graphData?.x.toString()) {
+        setGraphData(data.graphData);
+      }
+
       setStatusCode(data.statusCode);
 
       const msg: ClientMessage = { inputMode, graphs };
       ws.send(JSON.stringify(msg));
     };
-  }, [inputMode, ports, graphs, ws]);
+  }, [inputMode, ports, graphs, graphData, ws]);
 
   return (
     <AppContext.Provider
@@ -51,6 +56,7 @@ function App() {
         statusCode,
         graphs,
         setGraphs,
+        graphData,
       }}
     >
       <Stack height="100vh">

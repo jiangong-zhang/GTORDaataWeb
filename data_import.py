@@ -8,9 +8,47 @@ size_dict = {
 }
 
 
+class Data:
+  def __init__(self, config: dict):
+    self.config = config
+
+    self.reset()
+  
+
+  def reset(self):
+    self.start_time = None
+
+    self.millis = []
+    self.data = []
+    for sensor in self.config['sensors']:
+      datatypes = self.config['types'][sensor['type']]['datatypes']
+      for datatype in datatypes:
+        self.data.append([])
+
+
+  def add_entry(self, millis: int, entry: list[int]):
+    if self.start_time is None:
+      self.start_time = time.time() * 1000
+
+    self.millis.append(time.time() * 1000 - self.start_time)
+    for i, val in enumerate(entry):
+      self.data[i].append(val)
+
+
+  def get_graph_data(self, graphs: list[int]):
+    graph_data = {
+      'x': self.millis,
+      'y': [],
+    }
+    for g in graphs:
+      graph_data['y'].append(self.data[g])
+    return graph_data
+
+
 class DataImport:
-  def __init__(self, input_mode: dict, config: dict):
+  def __init__(self, input_mode: dict, data: Data, config: dict):
     self.input_mode = input_mode
+    self.data = data
     self.config = config
     self.teensy_ser = None
 
@@ -19,15 +57,12 @@ class DataImport:
     self.current_packet = []
     self.packets_received = 0
 
-    self.expected_size = 0
-    self.data = { 'millis': [] }
+    self.expected_size = 4 # length of millis
 
     for sensor in config['sensors']:
       datatypes = config['types'][sensor['type']]['datatypes']
       for datatype in datatypes:
         self.expected_size += size_dict[datatype]
-
-      self.data[sensor['name']] = []
 
     self.stop_thread = threading.Event()
 
@@ -70,23 +105,22 @@ class DataImport:
   def unpacketize(self):
     data = self.current_packet[len(self.start_code):-len(self.end_code)]
 
-    millis = int.from_bytes(data[:4], 'little')
-    self.data['millis'].append(millis)
-    data = data[4:]
-
     if len(data) == self.expected_size:
+      millis = int.from_bytes(data[:4], 'little')
+      data = data[4:]
+
+      entry = []
       i = 0
       for sensor in self.config['sensors']:
         datatypes = self.config['types'][sensor['type']]['datatypes']
-        vals = []
         for datatype in datatypes:
           raw_val = data[i:i+size_dict[datatype]]
           if datatype == 'float32':
             val = struct.unpack('f', bytes(raw_val))[0]
-            vals.append(val)
+            entry.append(val)
             
           i += size_dict[datatype]
-        self.data[sensor['name']].append(vals)
+      self.data.add_entry(millis, entry)
 
       self.packets_received += 1
       print(f'Received packet {self.packets_received} at time {millis}')
@@ -101,6 +135,7 @@ class DataImport:
   
 
   def close(self):
+    self.data.reset()
     self.stop_thread.set()
     self.read_data_thread.join()
 
