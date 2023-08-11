@@ -3,15 +3,15 @@ import struct
 import threading
 import time
 
+from config import config
+
 size_dict = {
   'float32': 4,
 }
 
 
 class Data:
-  def __init__(self, config: dict):
-    self.config = config
-
+  def __init__(self):
     self.reset()
   
 
@@ -20,8 +20,8 @@ class Data:
 
     self.millis = []
     self.data = []
-    for sensor in self.config['sensors']:
-      datatypes = self.config['types'][sensor['type']]['datatypes']
+    for sensor in config['sensors']:
+      datatypes = config['types'][sensor['type']]['datatypes']
       for datatype in datatypes:
         self.data.append([])
 
@@ -46,10 +46,9 @@ class Data:
 
 
 class DataImport:
-  def __init__(self, input_mode: dict, data: Data, config: dict):
+  def __init__(self, input_mode: dict, data: Data):
     self.input_mode = input_mode
     self.data = data
-    self.config = config
     self.teensy_ser = None
 
     self.start_code = [0xee, 0xe0]
@@ -111,8 +110,8 @@ class DataImport:
 
       entry = []
       i = 0
-      for sensor in self.config['sensors']:
-        datatypes = self.config['types'][sensor['type']]['datatypes']
+      for sensor in config['sensors']:
+        datatypes = config['types'][sensor['type']]['datatypes']
         for datatype in datatypes:
           raw_val = data[i:i+size_dict[datatype]]
           if datatype == 'float32':
