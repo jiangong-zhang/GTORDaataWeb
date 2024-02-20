@@ -6,8 +6,9 @@ import {
   Stack,
   SxProps,
   Typography,
+  Button,
 } from "@mui/material";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react"; // Make sure useState is imported
 import { AppContext } from "../AppContext";
 import config from "../../../config.json";
 
@@ -54,6 +55,15 @@ export function Home() {
     <Chip label="Connected" color="success" />,
   ];
 
+  const SensorGraphComponent = ({ sensorName, datatype }) => {
+    return (
+      <div>
+        <h3>{sensorName}</h3>
+        <p>Datatype: {datatype}</p>
+        {/*idk actual stuff goes here*/}
+      </div>
+    );
+  };
   return (
     <Grid
       container
@@ -63,7 +73,7 @@ export function Home() {
       height="100%"
       boxSizing="border-box"
     >
-      <Grid item xs={4} height="100%">
+      <Grid item xs={3} height="100%">
         <Paper sx={paperSx}>
           <Stack
             direction="row"
@@ -87,24 +97,65 @@ export function Home() {
               <Checkbox
                 size="small"
                 sx={{ padding: 0.5 }}
-                checked={graphs.includes(i)}
-                disabled={statusCode !== 2}
-                onChange={(e) => selectSensor(i, e.target.checked)}
+                //checked={graphs.includes(i)}
+                onChange={(e) => {selectSensor(i, e.target.checked);}}
               />
               <Typography variant="body2" marginLeft={0.5}>
                 {sensor.name}
               </Typography>
             </Stack>
           ))}
+        </Paper>  
+      </Grid>
+
+
+      <Grid item xs={3}>
+        <Paper sx={paperSx}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            marginBottom={1.5}
+          >
+            <Typography variant="h6">Buttons ! ! ! ! ! ! </Typography>
+          </Stack>
+          <Typography variant="h6" marginBottom={1.5}>
+            Sensors with buttons ! ! ! ! ! 
+          </Typography>
+          {sensorValues.map((sensor, i) => (
+            <Stack
+              direction="row"
+              alignItems="center"
+              marginLeft={-0.5}
+              key={i}
+            >
+              <Button variant="text"
+              >{sensor.name}</Button>
+            </Stack>
+          ))}
         </Paper>
       </Grid>
-      <Grid item xs={8}>
+
+
+      <Grid item xs={6}>
         <Paper sx={paperSx}>
-          <Typography variant="h6" marginBottom={1.5}>
-            Data
-          </Typography>
-          {graphs.map((idx, i) => (
-            <p key={i}>{sensorValues[idx].name}</p> // temporary placeholder for graphs
+        <Typography variant="h6" marginBottom={1.5}>
+          Data
+        </Typography>
+        {graphs.map((idx) => (
+          <div>
+          <SensorGraphComponent
+            key={idx}
+            sensorName={sensorValues[idx].name}
+            datatype={sensorValues[idx].datatype}
+          />
+              <Checkbox
+                size="small"
+                sx={{ padding: 0.5 }}
+                //checked={graphs.includes(i)}
+                onChange={(e) => {selectSensor(idx, e.target.checked);}}
+              />
+              </div>
           ))}
         </Paper>
       </Grid>
