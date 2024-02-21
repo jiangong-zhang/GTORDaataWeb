@@ -6,14 +6,16 @@ import {
   Stack,
   SxProps,
   Typography,
+  Button,
 } from "@mui/material";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../AppContext";
 import config from "../../../config.json";
+import TestComponent from "./TestComponent";
 
 type SensorType = keyof typeof config.types;
 
-const paperSx: SxProps = {
+const paperSx: SxProps = { 
   height: "100%",
   borderRadius: 3,
   padding: 2,
@@ -21,6 +23,13 @@ const paperSx: SxProps = {
 };
 
 export function Home() {
+
+  const [showComponent, setShowComponent] = useState(false);
+
+  const handleClick = () => {
+    setShowComponent(true);
+  };
+
   const { inputMode, statusCode, graphs, setGraphs, graphData } =
     useContext(AppContext);
 
@@ -63,7 +72,7 @@ export function Home() {
       height="100%"
       boxSizing="border-box"
     >
-      <Grid item xs={4} height="100%">
+      <Grid item xs={3} height="100%">
         <Paper sx={paperSx}>
           <Stack
             direction="row"
@@ -87,25 +96,57 @@ export function Home() {
               <Checkbox
                 size="small"
                 sx={{ padding: 0.5 }}
-                checked={graphs.includes(i)}
-                disabled={statusCode !== 2}
-                onChange={(e) => selectSensor(i, e.target.checked)}
+                //checked={graphs.includes(i)}
+                onChange={(e) => {selectSensor(i, e.target.checked);}}
               />
               <Typography variant="body2" marginLeft={0.5}>
                 {sensor.name}
               </Typography>
             </Stack>
           ))}
+        </Paper>  
+      </Grid>
+
+
+      <Grid item xs={3}>
+        <Paper sx={paperSx}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            marginBottom={1.5}
+          >
+            <Typography variant="h6">Buttons ! ! ! ! ! ! </Typography>
+          </Stack>
+          <Typography variant="h6" marginBottom={1.5}>
+            Sensors with buttons ! ! ! ! ! 
+          </Typography>
+          {sensorValues.map((sensor, i) => (
+            <Stack
+              direction="row"
+              alignItems="center"
+              marginLeft={-0.5}
+              key={i}
+            >
+              <Button onClick={handleClick}>Load TestComponent</Button>
+            </Stack>
+          ))}
         </Paper>
       </Grid>
-      <Grid item xs={8}>
+
+
+      <Grid item xs={6}>
         <Paper sx={paperSx}>
-          <Typography variant="h6" marginBottom={1.5}>
-            Data
-          </Typography>
-          {graphs.map((idx, i) => (
+        <Typography variant="h6" marginBottom={1.5}>
+          Data
+        </Typography>
+        {graphs.map((idx, i) => (
             <p key={i}>{sensorValues[idx].name}</p> // temporary placeholder for graphs
           ))}
+                  <div>
+          {showComponent && <TestComponent/> }
+          {/* You can add more components here to fill the grid if needed */}
+        </div>
         </Paper>
       </Grid>
     </Grid>
