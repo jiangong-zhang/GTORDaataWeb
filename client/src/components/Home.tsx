@@ -11,10 +11,11 @@ import {
 import { useContext, useEffect, useState } from "react"; // Make sure useState is imported
 import { AppContext } from "../AppContext";
 import config from "../../../config.json";
+import TestComponent from "./TestComponent";
 
 type SensorType = keyof typeof config.types;
 
-const paperSx: SxProps = {
+const paperSx: SxProps = { 
   height: "100%",
   borderRadius: 3,
   padding: 2,
@@ -22,6 +23,13 @@ const paperSx: SxProps = {
 };
 
 export function Home() {
+
+  const [showComponent, setShowComponent] = useState(false);
+
+  const handleClick = () => {
+    setShowComponent(true);
+  };
+
   const { inputMode, statusCode, graphs, setGraphs, graphData } =
     useContext(AppContext);
 
@@ -129,8 +137,7 @@ export function Home() {
               marginLeft={-0.5}
               key={i}
             >
-              <Button variant="text"
-              >{sensor.name}</Button>
+              <Button onClick={handleClick}>Load TestComponent</Button>
             </Stack>
           ))}
         </Paper>
@@ -142,21 +149,13 @@ export function Home() {
         <Typography variant="h6" marginBottom={1.5}>
           Data
         </Typography>
-        {graphs.map((idx) => (
-          <div>
-          <SensorGraphComponent
-            key={idx}
-            sensorName={sensorValues[idx].name}
-            datatype={sensorValues[idx].datatype}
-          />
-              <Checkbox
-                size="small"
-                sx={{ padding: 0.5 }}
-                //checked={graphs.includes(i)}
-                onChange={(e) => {selectSensor(idx, e.target.checked);}}
-              />
-              </div>
+        {graphs.map((idx, i) => (
+            <p key={i}>{sensorValues[idx].name}</p> // temporary placeholder for graphs
           ))}
+                  <div>
+          {showComponent && TestComponent }
+          {/* You can add more components here to fill the grid if needed */}
+        </div>
         </Paper>
       </Grid>
     </Grid>
