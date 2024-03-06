@@ -6,14 +6,16 @@ import {
   Stack,
   SxProps,
   Typography,
+  Button,
 } from "@mui/material";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AppContext } from "../AppContext";
 import config from "../../../config.json";
+import TestComponent from "./TestComponent";
 
 type SensorType = keyof typeof config.types;
 
-const paperSx: SxProps = {
+const paperSx: SxProps = { 
   height: "100%",
   borderRadius: 3,
   padding: 2,
@@ -21,8 +23,12 @@ const paperSx: SxProps = {
 };
 
 export function Home() {
-  const { inputMode, statusCode, graphs, setGraphs, graphData } =
-    useContext(AppContext);
+  const [selectedSensor, setSelectedSensor] = useState(null); // State to track the selected sensor
+
+  const { inputMode, statusCode, graphs, setGraphs, graphData } = useContext(AppContext);
+  const handleClick = (sensorName) => {
+    setSelectedSensor(sensorName); // Set the selected sensor name
+  };
 
   function selectSensor(idx: number, on: boolean) {
     if (on) {
@@ -35,18 +41,17 @@ export function Home() {
   }
 
   const sensorValues = config.sensors.flatMap((sensor) => {
-    return config.types[sensor.type as SensorType].datatypes.map((d) => ({
+    return config.types[sensor.type as SensorType].datatypes.map((datatype) => ({
       name: sensor.name,
-      datatype: d,
+      datatype: datatype,
     }));
   });
 
   useEffect(() => {
     setGraphs([]);
+    // This is to reset graphs when the inputMode changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputMode]);
-
-  console.log(graphData);
 
   const statusChips = [
     <Chip label="Disconnected" color="error" />,
@@ -63,7 +68,7 @@ export function Home() {
       height="100%"
       boxSizing="border-box"
     >
-      <Grid item xs={4} height="100%">
+      <Grid item xs={3} height="100%">
         <Paper sx={paperSx}>
           <Stack
             direction="row"
@@ -87,8 +92,6 @@ export function Home() {
               <Checkbox
                 size="small"
                 sx={{ padding: 0.5 }}
-                checked={graphs.includes(i)}
-                disabled={statusCode !== 2}
                 onChange={(e) => selectSensor(i, e.target.checked)}
               />
               <Typography variant="body2" marginLeft={0.5}>
@@ -96,16 +99,36 @@ export function Home() {
               </Typography>
             </Stack>
           ))}
-        </Paper>
+        </Paper>  
       </Grid>
-      <Grid item xs={8}>
+
+      <Grid item xs={3}>
         <Paper sx={paperSx}>
           <Typography variant="h6" marginBottom={1.5}>
-            Data
+            Sensors with buttons
           </Typography>
-          {graphs.map((idx, i) => (
+          {sensorValues.map((sensor, i) => (
+            <Stack
+              direction="row"
+              alignItems="center"
+              marginLeft={-0.5}
+              key={i}
+            >
+              <Button onClick={() => handleClick(sensor.name)}>{sensor.name}</Button>
+            </Stack>
+          ))}
+        </Paper>
+      </Grid>
+
+      <Grid item xs={6}>
+        <Paper sx={paperSx}>
+          <Typography variant="h6" marginBottom={1.5}>
+            Data Visualization
+            {graphs.map((idx, i) => (
             <p key={i}>{sensorValues[idx].name}</p> // temporary placeholder for graphs
           ))}
+          </Typography>
+          {selectedSensor && graphData && <TestComponent sensorName={selectedSensor} sensData={graphData} />}
         </Paper>
       </Grid>
     </Grid>
