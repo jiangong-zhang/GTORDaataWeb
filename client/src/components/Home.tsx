@@ -59,6 +59,15 @@ export function Home() {
     <Chip label="Connected" color="success" />,
   ];
 
+  const SensorGraphComponent = ({ sensorName, datatype }) => {
+    return (
+      <div>
+        <h3>{sensorName}</h3>
+        <p>Datatype: {datatype}</p>
+        {/*idk actual stuff goes here*/}
+      </div>
+    );
+  };
   return (
     <Grid
       container
@@ -92,7 +101,8 @@ export function Home() {
               <Checkbox
                 size="small"
                 sx={{ padding: 0.5 }}
-                onChange={(e) => selectSensor(i, e.target.checked)}
+                //checked={graphs.includes(i)}
+                onChange={(e) => {selectSensor(i, e.target.checked);}}
               />
               <Typography variant="body2" marginLeft={0.5}>
                 {sensor.name}
@@ -104,6 +114,14 @@ export function Home() {
 
       <Grid item xs={3}>
         <Paper sx={paperSx}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            marginBottom={1.5}
+          >
+            <Typography variant="h6">Buttons ! ! ! ! ! ! </Typography>
+          </Stack>
           <Typography variant="h6" marginBottom={1.5}>
             Sensors with buttons
           </Typography>
