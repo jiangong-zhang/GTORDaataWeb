@@ -23,10 +23,10 @@ const paperSx: SxProps = {
 };
 
 export function Home() {
-  const [selectedSensor, setSelectedSensor] = useState(null); // State to track the selected sensor
+  const [selectedSensor, setSelectedSensor] = useState<string | null>(null); // State to track the selected sensor
 
   const { inputMode, statusCode, graphs, setGraphs, graphData } = useContext(AppContext);
-  const handleClick = (sensorName) => {
+  const handleClick = (sensorName:string) => {
     setSelectedSensor(sensorName); // Set the selected sensor name
   };
 
@@ -128,7 +128,7 @@ export function Home() {
             <p key={i}>{sensorValues[idx].name}</p> // temporary placeholder for graphs
           ))}
           </Typography>
-          {selectedSensor && graphData && <TestComponent sensorName={selectedSensor} sensData={graphData} />}
+          {selectedSensor && <TestComponent sensorName={selectedSensor} />}
         </Paper>
       </Grid>
     </Grid>
